@@ -1,21 +1,59 @@
 services:
-  frontend:
-    image: quashbugs/quash-max-frontend:latest
-    container_name: max-frontend
+#  frontend:
+#    image: quashbugs/quash-max-frontend:latest
+#    container_name: max-frontend
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      - quash-network
+
+  mongodb:
+    image: mongo:latest
+    container_name: quash-mongodb
     ports:
-      - "3000:3000"
+      - '27018:27017'
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=quash
+      - MONGO_INITDB_ROOT_PASSWORD=quash123
     networks:
       - quash-network
 
   backend:
     image: quashbugs/quash-max-backend:latest
-    container_name: max-backend
+    container_name: quash-backend
     ports:
-      - "8080:8080"
+      - '8080:8080'
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/src/main/resources/application.properties:/app/backend/application.properties
     environment:
-      - SPRING_CONFIG_LOCATION=classpath:/application.properties,optional:file:/app/backend/application.properties
+      - SPRING_DATA_MONGODB_URI=mongodb://quash:quash123@mongodb:27017/quash?authSource=admin
+      - TOKEN_SIGNING_KEY=uyrAxjO/5jsZTFepdsqfvzWDKauAA5lntCAuMm7IMEU=
+      - JWT_SECRET=local-development-secret-key-please-change-in-production
+      - JWT_EXPIRATION_MS=86400000
+      - CLOUD_PROVIDER=gcp
+      - GCP_BUCKET_NAME=quash
+      - GCP_PROJECT_ID=architech-t
+      - GCP_CLIENT_EMAIL=quash-storage@architech-t.iam.gserviceaccount.com
+      - 'GCP_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCl86OQ7xqzhV23\nVphLTOJD86JuwwNhph9b5WxAlZ0bA4iTDRN/W/Nv0ThQMsOla29k3i+h1FfQZAoe\nUdFLCUSu2AR19AF9hG3MAbixOMJQeVVocMu8q5dPKK0TM/A3/6+AET/oxDtd2/9R\nDLmokAoQ5jkErIH4QwmaOhiSfHJQgGA81ihDFF+J+2A1jiyblLXPbtf0+nvvVB5u\nfkMDBbo9GET1iqA7JKf3TBVOyMYjrpDu0Rzr8IFmSdjbS41ercAHruT12uoOJJkj\nJH/MVyzeyOs40axO11BStEsHudawsbxQC/se1EMH+yXMYDHxGpA3LP0ORNLpEM+A\nuhYnmziRAgMBAAECggEACcMD7V00nyLvy75/Mri+UOchOC47rJq6xVYAxj4hccrF\nVc8YWpl0VQYZL6suHoosETfPqfo6wyegqmlqLBA1bH/eUqOXPdn/Im0R1Jzv3eTR\nQmrrf85BK4x159yvhf/B7quKbJ0JwqA+YSG5lGyKpwqqh8zvpUSo6TFUgN4V/whX\nKHdC+wngtXtUqpgBhDHFPWKxcGTwjn8g4DVfJb0w2Rf8CJpelB/h+IK+VN1UbcEN\nIP2J+FnYC29+xCXxtylTU6aNTBSgZdZ5jUDyRY2o81J6CL3QAekK5+MV0wTQkLMo\nQHEphjlcve9ZY+Pw+NtL7CtM8QQrRALTFTX1QSHm5QKBgQDhVF7Fgub59KutEGHs\nKvMpgkGQAxQEqzt6ryPUmWrTfvgwJ/5d2Tbf8LWlXob+fcj/3sVEhGnO1TUw6zKO\nwuQXdY0pyAMUTtd0nwOjp+XLnifX84pG/7O22DfkajsTSrApWqtEKqlImjSYN001\nsfOu/dpdFa92kmeWwgXnHPKPbQKBgQC8ij3na7DbvsHKsOsDAb3vdQfF/QrXyoXG\nZ9HIgFOdS6iIAAoTQcY9zbU4p209V1yzcQgq/5jHJSE80kA3XKZQlEPKLZDhuvim\nB/MX8670VkbchtN6mXuLS18hJ0GCZx1fp0YOEbWbsqB5szNNCB9RkuOvxWvmMjWU\nq57aawJDNQKBgQDZXsDGHM+hVay/mUw9vfkxk9yXhsCq+Fy6r3YLQ6zQNm5KVmqG\nMmNDiTxSOWxU2Rcr7sWyoWJJC1jyxhHRsqTDFL2HDtIZpy0l7bhfCjseQIYDR4ef\nklDWFKNmkCxJIgXq/vK1IcqIpWoTZVXwdKi1qWIb5i2MXxPbVXTITR6ZyQKBgQCZ\nkmkWBYwLkfe8KBtlWZfiYoswZAre9qG8mHgyPwTcjPH7xTxvrxXQ5awFN6stWemy\naBFlJMjG/aFzLzcLYTY/UGVfW3o1w9whMTx7eAw8DcKugkvkAvy023HjSVx84Yz1\niwTvFNG+vuMj/il9R25rPaCkXcSjvqYSMTC1bJBtOQKBgQCItZzv1oICqrB958mk\nXe79nzt6CF1PEmqBvU9DXHRXk5SXoDKZ0PZZNcTVv9UGN6l0LcTBOehv3dzeYMGK\nlYTtpjTyv9TabBSzsPVJXX0GjHMaWK03f7idBc6usug50qEIHk2+jv8qPBJ9BGWh\nngMPrWG5pa4f1a69bp3fJnmw2A==\n-----END PRIVATE KEY-----\n'
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - 'SPRING_MAIL_USERNAME=liviogama@gmail.com'
+      - 'SPRING_MAIL_PASSWORD=quem xzds pfkw szka'
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT=5000
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT=5000
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT=5000
+      - 'FROM_EMAIL_ADDRESS=liviogama@gmail.com'
     networks:
       - quash-network
+
+volumes:
+  mongodb_data:
 
 networks:
   quash-network:

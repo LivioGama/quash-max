@@ -1,20 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { signIn } from "next-auth/react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { HorizontalDevider } from "@/components/ui/horizontal-devider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 import { Envelope, LockKey } from "./lib/icons";
 
-import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
 import SpinLoader from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
 import { ApiError } from "./types/organisation-types";
 
 const loginSchema = z.object({
@@ -41,14 +41,20 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<loginSchema>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "livio.gamassia@gmail.com",
+      password: "7rRE%c@2f0Gnk9v*agQk",
+    },
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const onSubmit: SubmitHandler<loginSchema> = async (data) => {
     const { email, password } = data;
+    console.log("Attempting to log in with email:", email);
 
     setLoading(true);
     try {
@@ -56,9 +62,11 @@ export default function Login() {
         redirect: false,
         email,
         password,
+        callbackUrl: "/dashboard",
       });
 
       if (res?.error) {
+        console.log("Login response error:", res.error);
         const errorData = JSON.parse(res?.error);
         toast({
           description:
@@ -67,10 +75,11 @@ export default function Login() {
           typeof: "error",
         });
       } else {
+        console.log("Login successful, reloading page");
         window.location.reload();
       }
     } catch (error: unknown) {
-      console.log(error);
+      console.log("Login error:", error);
     } finally {
       setLoading(false);
     }
