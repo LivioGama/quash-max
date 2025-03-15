@@ -1,0 +1,26 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.DS_Store
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Generated documentation
+docs/
+# Swift Package Manager
+
+# Xcode
+
+# CocoaPods
+
+# Generated documentation
+.index-build
