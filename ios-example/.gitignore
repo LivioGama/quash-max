@@ -1,0 +1,20 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+xcuserdata/
+DerivedData/
+.DS_Store
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Generated documentation
+docs/
+.index-build
+
+# Firebase configuration files
+GoogleService-Info.plist
